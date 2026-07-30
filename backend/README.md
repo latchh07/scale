@@ -19,6 +19,15 @@ You can change:
 
 The two weights must add up to `1`. Run the tests after every policy change.
 
+### Current calibration (policy 2.1.0)
+
+The final score remains 80% deterministic rules and 20% model score. Generic
+behaviours such as a new counterparty or ordinary transaction volume are not
+scored on their own. The policy only scores a new counterparty when the payment
+is at least three times the customer's prior norm, and uses calibrated amount
+and daily-value tiers. KYC, geography, PEP, and sanctions retain their role as
+separate compliance context; sanctions remain hard overrides.
+
 ## Run locally
 
 Requires Node.js 20 or newer. There are no third-party packages to install.

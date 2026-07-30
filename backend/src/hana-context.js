@@ -154,7 +154,8 @@ function buildRuleInputs(transaction, history, owners, features) {
     valueRatio24h: features.value_ratio_24h,
     transactionCount1h: features.transaction_count_1h,
     transactionCount24h: features.transaction_count_24h,
-    isNewCounterparty: Boolean(features.is_new_counterparty),
+    newCounterpartyLargeAmount:
+      Boolean(features.is_new_counterparty) && features.amount_ratio >= 3,
     isUnusualTime: Boolean(features.is_unusual_time),
     newHighRiskCountry: Boolean(features.is_new_country) && highRiskDestination,
     highValueRoundAmount:

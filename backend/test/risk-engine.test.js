@@ -29,9 +29,9 @@ test("configured weights combine rule and anomaly scores", () => {
     ruleInputs: {
       destinationFatfStatus: "BLACK_LIST",
       pepExposure: true,
-      isNewCounterparty: true,
-      amountRatio: 5,
-      transactionCount1h: 2,
+      adverseMedia: true,
+      newCounterpartyLargeAmount: true,
+      amountRatio: 10,
     },
     anomalyResult: { anomalyScore: 100, modelVersion: "test-v1" },
   });
@@ -44,11 +44,27 @@ test("configured weights combine rule and anomaly scores", () => {
 
 test("exclusive amount rules do not double count", () => {
   const result = assess({
-    ruleInputs: { amountRatio: 5 },
+    ruleInputs: { amountRatio: 10 },
   });
   assert.equal(result.scoreBreakdown.ruleScore, 30);
   assert.equal(result.rulesTriggered.length, 1);
   assert.equal(result.rulesTriggered[0].ruleId, "EXTREME_AMOUNT_DEVIATION");
+});
+
+test("new counterparty contributes only when paired with a large amount", () => {
+  const ordinary = assess({ ruleInputs: { isNewCounterparty: true } });
+  const elevated = assess({ ruleInputs: { newCounterpartyLargeAmount: true } });
+
+  assert.equal(ordinary.scoreBreakdown.ruleScore, 0);
+  assert.equal(elevated.scoreBreakdown.ruleScore, 10);
+  assert.equal(elevated.rulesTriggered[0].ruleId, "NEW_COUNTERPARTY_LARGE_PAYMENT");
+});
+
+test("daily value tiers select only the highest calibrated rule", () => {
+  const result = assess({ ruleInputs: { valueRatio24h: 50 } });
+  assert.equal(result.scoreBreakdown.ruleScore, 25);
+  assert.equal(result.rulesTriggered.length, 1);
+  assert.equal(result.rulesTriggered[0].ruleId, "EXTREME_DAILY_VALUE");
 });
 
 test("sanctions match overrides the weighted score", () => {
@@ -64,12 +80,12 @@ test("missing model falls back to the rule score", () => {
   const result = assess({
     ruleInputs: {
       destinationFatfStatus: "GREY_LIST",
-      isNewCounterparty: true,
+      newCounterpartyLargeAmount: true,
     },
     anomalyResult: null,
   });
-  assert.equal(result.scoreBreakdown.ruleScore, 20);
-  assert.equal(result.assessment.overallScore, 20);
+  assert.equal(result.scoreBreakdown.ruleScore, 25);
+  assert.equal(result.assessment.overallScore, 25);
   assert.equal(result.scoreBreakdown.ruleWeight, 1);
   assert.equal(result.modelSignals.status, "MODEL_UNAVAILABLE");
 });
