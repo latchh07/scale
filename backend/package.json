@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/server.js",
     "test": "node --test test/risk-engine.test.js",
-    "test:transaction": "node scripts/test-transaction.js"
+    "test:transaction": "node scripts/test-transaction.js",
+    "setup:assessment-store": "node --env-file=.env scripts/setup-assessment-store.js"
   },
   "engines": {
     "node": ">=20"

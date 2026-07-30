@@ -1,6 +1,11 @@
 import { createServer } from "node:http";
 
 import { fetchAnomalyResult } from "./anomaly-client.js";
+import {
+  listAssessmentSummaries,
+  loadAssessment,
+  persistAssessment,
+} from "./assessment-store.js";
 import { loadTransactionContext } from "./hana-context.js";
 import { calculateAssessment, loadPolicy } from "./risk-engine.js";
 
@@ -51,6 +56,32 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  const requestUrl = new URL(request.url, "http://localhost");
+  if (request.method === "GET" && requestUrl.pathname === "/api/risk-assessments/history") {
+    try {
+      const assessments = await listAssessmentSummaries(requestUrl.searchParams.get("limit"));
+      sendJson(response, 200, { assessments });
+    } catch (error) {
+      sendJson(response, 500, { error: `Could not load assessment history: ${error.message}` });
+    }
+    return;
+  }
+
+  const historyMatch = requestUrl.pathname.match(/^\/api\/risk-assessments\/history\/([0-9a-f-]{36})$/i);
+  if (request.method === "GET" && historyMatch) {
+    try {
+      const assessment = await loadAssessment(historyMatch[1]);
+      if (!assessment) {
+        sendJson(response, 404, { error: "Assessment not found" });
+      } else {
+        sendJson(response, 200, assessment);
+      }
+    } catch (error) {
+      sendJson(response, 500, { error: `Could not load assessment: ${error.message}` });
+    }
+    return;
+  }
+
   if (
     request.method === "POST" &&
     request.url === "/api/risk-assessments"
@@ -80,7 +111,17 @@ const server = createServer(async (request, response) => {
         anomalyResult,
         policy,
       });
-      sendJson(response, 200, result);
+      try {
+        const savedAssessment = await persistAssessment({
+          assessment: result,
+          featureSnapshot: payload.modelFeatures ?? null,
+          sourceCaseId: payload.sourceCaseId ?? null,
+        });
+        sendJson(response, 200, { ...result, ...savedAssessment, persistence: "SAVED" });
+      } catch (error) {
+        console.error("Assessment persistence unavailable:", error.message);
+        sendJson(response, 200, { ...result, persistence: "UNAVAILABLE" });
+      }
     } catch (error) {
       sendJson(response, 400, { error: error.message });
     }
@@ -113,11 +154,22 @@ const server = createServer(async (request, response) => {
         anomalyResult,
         policy,
       });
-      sendJson(response, 200, {
+      const responsePayload = {
         ...result,
         featureSnapshot: context.modelFeatures,
         historyTransactionCount: context.historyCount,
-      });
+      };
+      try {
+        const savedAssessment = await persistAssessment({
+          assessment: responsePayload,
+          featureSnapshot: context.modelFeatures,
+          sourceCaseId: payload.sourceCaseId ?? null,
+        });
+        sendJson(response, 200, { ...responsePayload, ...savedAssessment, persistence: "SAVED" });
+      } catch (error) {
+        console.error("Assessment persistence unavailable:", error.message);
+        sendJson(response, 200, { ...responsePayload, persistence: "UNAVAILABLE" });
+      }
     } catch (error) {
       const status = error.code === "TRANSACTION_NOT_FOUND" ? 404 : 400;
       sendJson(response, status, { error: error.message });
