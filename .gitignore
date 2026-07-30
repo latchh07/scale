@@ -1,0 +1,30 @@
+# Credentials and local environment files
+.env
+.env.*
+*.pem
+*.key
+*credential*
+*credentials*
+*creds*
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.egg-info/
+
+# AI Core data and generated artifacts
+ai-core/narrow_ai/data/
+ai-core/narrow_ai/model/
+*.joblib
+*.pkl
+*.csv
+
+# API clients can contain service keys and tokens after configuration
+ai-core/narrow_ai/api_collection/
+
+# OS/editor
+.DS_Store
+.vscode/
+

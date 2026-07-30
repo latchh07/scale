@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  annotations:
+    scenarios.ai.sap.com/name: "Team 12 Risk Anomaly"
+    executables.ai.sap.com/name: "Team 12 Train Risk Anomaly"
+    executables.ai.sap.com/description: "Train an explainable Isolation Forest anomaly model"
+  labels:
+    scenarios.ai.sap.com/id: "scenario-risk-anomaly-team12"
+    executables.ai.sap.com/id: "wt-risk-anomaly-team12"
+    ai.sap.com/version: 0.0.1
+  name: wt-risk-anomaly-team12
+spec:
+  entrypoint: train-risk-anomaly
+  templates:
+  - name: train-risk-anomaly
+    metadata:
+      labels:
+        ai.sap.com/resourcePlan: starter
+    inputs:
+      artifacts:
+      - name: transaction-data
+        path: /app/data/
+    outputs:
+      artifacts:
+      - name: risk-model-output
+        path: /app/model/
+        globalName: risk-model-output
+        archive:
+          none: {}
+    container:
+      image: mgcxzzz/team12-risk-anomaly:latest
+      imagePullPolicy: Always
+      command: ["/bin/sh", "-c"]
+      args:
+      - >
+        set -e && echo "---Training Started---" && python /app/src/train.py && ls -lR /app/model/ && echo "---Training Ended---"
