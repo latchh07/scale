@@ -8,7 +8,7 @@ metadata:
   labels:
     scenarios.ai.sap.com/id: "scenario-risk-anomaly-team12"
     executables.ai.sap.com/id: "wt-risk-anomaly-team12"
-    ai.sap.com/version: 0.0.1
+    ai.sap.com/version: 0.0.2
   name: wt-risk-anomaly-team12
 spec:
   entrypoint: train-risk-anomaly
@@ -29,7 +29,7 @@ spec:
         archive:
           none: {}
     container:
-      image: mgcxzzz/team12-risk-anomaly:latest
+      image: mgcxzzz/team12-risk-anomaly:v3-chronological
       imagePullPolicy: Always
       command: ["/bin/sh", "-c"]
       args:

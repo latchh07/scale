@@ -7,9 +7,7 @@ the spam classifier with the Team 12 transaction anomaly model.
 
 1. Docker Hub image owner: `mgcxzzz`.
 2. Build and push the image as:
-   `mgcxzzz/team12-risk-anomaly:latest`.
-   Verified Docker Hub digest:
-   `sha256:97944663649f9a1d38a6f0e87390b8cc05d9f0b3d3f29c9385cec3feae7d91be`.
+   `mgcxzzz/team12-risk-anomaly:v3-chronological`.
 3. Do not copy object-store credentials, SAP service keys, `.env` files or
    generated models into this repository.
 4. Keep the Bruno collection local. It is ignored because it can contain
@@ -19,9 +17,12 @@ the spam classifier with the Team 12 transaction anomaly model.
 
 The training workflow expects the registered dataset artifact to contain:
 
-`risk_features.csv`
+- `train.csv`
+- `validation.csv`
+- `test.csv`
+- `split_manifest.json`
 
-It must contain at least 50 rows and these columns:
+The model inputs use these columns:
 
 - `amount_ratio`
 - `amount_zscore`
@@ -36,6 +37,8 @@ It must contain at least 50 rows and these columns:
 The last three columns must contain only `0` or `1`. Known compliance facts
 such as KYC risk, sanctions, PEP and adverse media are intentionally handled
 by the deterministic rule engine rather than this behavioural anomaly model.
+Validation and test data also contain timestamps and supplied anomaly labels,
+which are used only for chronological evaluation and never passed to the model.
 
 ## SAP AI Launchpad values
 

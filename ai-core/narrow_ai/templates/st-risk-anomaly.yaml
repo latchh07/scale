@@ -8,7 +8,7 @@ metadata:
   labels:
     scenarios.ai.sap.com/id: "scenario-risk-anomaly-team12"
     executables.ai.sap.com/id: "st-risk-anomaly-team12"
-    ai.sap.com/version: 0.0.1
+    ai.sap.com/version: 0.0.2
   name: st-risk-anomaly-team12
 spec:
   inputs:
@@ -33,7 +33,7 @@ spec:
             maxReplicas: 2
             containers:
             - name: kserve-container
-              image: mgcxzzz/team12-risk-anomaly:latest
+              image: mgcxzzz/team12-risk-anomaly:v3-chronological
               ports:
               - containerPort: 9001
                 protocol: TCP

@@ -17,10 +17,12 @@ COPY src/ /app/src/
 ENV PYTHONPATH=/app/src \
     MODEL_DIR=/mnt/models/ \
     DATA_DIR=/app/data/ \
-    DATA_FILE=risk_features.csv \
+    TRAIN_FILE=train.csv \
+    VALIDATION_FILE=validation.csv \
+    TEST_FILE=test.csv \
     MODEL_OUT_DIR=/app/model/ \
-    MODEL_VERSION=v2-behaviour-only \
-    CONTAMINATION=0.03
+    MODEL_VERSION=v3-chronological-holdout \
+    CONTAMINATION=0.05
 
 EXPOSE 9001
 

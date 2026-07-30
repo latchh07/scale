@@ -21,6 +21,7 @@ class ModelBundle:
     reference_scores: np.ndarray
     medians: dict[str, float]
     scales: dict[str, float]
+    anomaly_flag_threshold: int
     model_version: str
     trained_at: str
 
@@ -28,13 +29,16 @@ class ModelBundle:
 def train_bundle(
     features: pd.DataFrame,
     *,
-    contamination: float = 0.03,
+    contamination: float = 0.05,
+    anomaly_flag_threshold: int = 95,
     model_version: str = "v1",
 ) -> ModelBundle:
     if len(features) < 50:
         raise ValueError("At least 50 historical transactions are required")
     if not 0 < contamination <= 0.5:
         raise ValueError("contamination must be greater than 0 and at most 0.5")
+    if not 0 <= anomaly_flag_threshold <= 100:
+        raise ValueError("anomaly_flag_threshold must be between 0 and 100")
 
     model = IsolationForest(
         n_estimators=200,
@@ -55,6 +59,7 @@ def train_bundle(
         reference_scores=reference_scores,
         medians={key: float(value) for key, value in medians.items()},
         scales={key: float(value) for key, value in scales.items()},
+        anomaly_flag_threshold=int(anomaly_flag_threshold),
         model_version=model_version,
         trained_at=datetime.now(UTC).isoformat(),
     )
@@ -104,11 +109,15 @@ def score_row(bundle: ModelBundle, row: pd.DataFrame) -> dict[str, Any]:
 
     return {
         "anomalyScore": anomaly_score,
-        "anomalyFlag": anomaly_score >= 85,
+        "anomalyFlag": anomaly_score >= bundle.anomaly_flag_threshold,
         "anomalyBand": (
-            "HIGH" if anomaly_score >= 85 else "MEDIUM" if anomaly_score >= 70 else "LOW"
+            "HIGH"
+            if anomaly_score >= bundle.anomaly_flag_threshold
+            else "MEDIUM"
+            if anomaly_score >= 70
+            else "LOW"
         ),
         "modelVersion": bundle.model_version,
+        "flagThreshold": bundle.anomaly_flag_threshold,
         "topDeviations": top_reasons,
     }
-
