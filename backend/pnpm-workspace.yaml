@@ -1,0 +1,2 @@
+allowBuilds:
+  '@sap/hana-client': true

@@ -44,6 +44,25 @@ Invoke-RestMethod -Uri http://localhost:3000/api/risk-assessments `
   -Method Post -ContentType "application/json" -Body $body
 ```
 
+## Assess a HANA transaction directly
+
+After configuring the HANA environment variables, call:
+
+`POST /api/risk-assessments/from-transaction`
+
+```json
+{
+  "transactionId": "<HANA transaction ID>",
+  "alertId": "optional-alert-id"
+}
+```
+
+The backend retrieves the transaction, uses only earlier transactions from the
+same originator to build the nine behavioural features, retrieves KYC/owner/
+country/industry context, calls AI Core, and returns one assessment JSON.
+It never sends HANA identifiers, names, KYC, or sanctions data to the anomaly
+model.
+
 The example supplies `anomalyResult` directly, which allows local development
 before AI Core is deployed.
 
@@ -64,4 +83,3 @@ SAP BTP service binding or Destination so credentials are not stored in code.
 
 Both the frontend and Joule should consume the backend response. They should not
 calculate scores independently or call the anomaly model directly.
-

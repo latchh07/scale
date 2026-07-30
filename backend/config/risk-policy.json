@@ -1,118 +1,39 @@
 {
-  "policyVersion": "1.0.0",
-  "weights": {
-    "rules": 0.75,
-    "anomaly": 0.25
-  },
+  "policyVersion": "2.0.0",
+  "weights": { "rules": 0.8, "anomaly": 0.2 },
   "scoreCap": 100,
-  "anomalyFlagThreshold": 85,
+  "anomalyFlagThreshold": 95,
   "riskBands": [
-    {
-      "minimum": 85,
-      "level": "CRITICAL",
-      "recommendedAction": "ESCALATE_FOR_REVIEW"
-    },
-    {
-      "minimum": 70,
-      "level": "HIGH",
-      "recommendedAction": "PRIORITY_REVIEW"
-    },
-    {
-      "minimum": 40,
-      "level": "MEDIUM",
-      "recommendedAction": "STANDARD_REVIEW"
-    },
-    {
-      "minimum": 0,
-      "level": "LOW",
-      "recommendedAction": "MONITOR"
-    }
+    { "minimum": 85, "level": "CRITICAL", "recommendedAction": "HOLD_AND_ESCALATE" },
+    { "minimum": 65, "level": "HIGH", "recommendedAction": "PRIORITY_REVIEW" },
+    { "minimum": 35, "level": "MEDIUM", "recommendedAction": "STANDARD_REVIEW" },
+    { "minimum": 0, "level": "LOW", "recommendedAction": "MONITOR" }
   ],
   "hardOverrides": [
-    {
-      "id": "SANCTIONS_MATCH",
-      "field": "sanctionsMatch",
-      "operator": "eq",
-      "value": true,
-      "minimumScore": 100,
-      "description": "Confirmed sanctions match"
-    },
-    {
-      "id": "WATCHLIST_MATCH",
-      "field": "watchlistMatch",
-      "operator": "eq",
-      "value": true,
-      "minimumScore": 90,
-      "description": "Confirmed watchlist match"
-    }
+    { "id": "ENTITY_SANCTIONS_MATCH", "field": "sanctionsMatch", "operator": "eq", "value": true, "minimumScore": 100, "description": "Confirmed sanctions match for a transaction party" },
+    { "id": "BENEFICIAL_OWNER_SANCTIONS_MATCH", "field": "beneficialOwnerSanctionsMatch", "operator": "eq", "value": true, "minimumScore": 100, "description": "Confirmed sanctions match for a beneficial owner" },
+    { "id": "SANCTIONED_DESTINATION", "field": "destinationCountrySanctioned", "operator": "eq", "value": true, "minimumScore": 95, "description": "Destination country is subject to sanctions" }
   ],
   "rules": [
-    {
-      "id": "HIGH_RISK_COUNTRY",
-      "field": "isHighRiskCountry",
-      "operator": "eq",
-      "value": true,
-      "points": 20,
-      "description": "Transaction involves a high-risk country"
-    },
-    {
-      "id": "NEW_COUNTERPARTY",
-      "field": "isNewCounterparty",
-      "operator": "eq",
-      "value": true,
-      "points": 15,
-      "description": "Payment was made to a new counterparty"
-    },
-    {
-      "id": "EXTREME_AMOUNT_DEVIATION",
-      "field": "amountRatio",
-      "operator": "gte",
-      "value": 5,
-      "points": 30,
-      "exclusiveGroup": "amount-deviation",
-      "description": "Amount is at least five times the customer's normal amount"
-    },
-    {
-      "id": "HIGH_AMOUNT_DEVIATION",
-      "field": "amountRatio",
-      "operator": "gte",
-      "value": 3,
-      "points": 20,
-      "exclusiveGroup": "amount-deviation",
-      "description": "Amount is at least three times the customer's normal amount"
-    },
-    {
-      "id": "HIGH_TRANSACTION_VELOCITY",
-      "field": "transactionCount1h",
-      "operator": "gte",
-      "value": 10,
-      "points": 15,
-      "description": "High transaction frequency during the last hour"
-    },
-    {
-      "id": "UNUSUAL_TIME",
-      "field": "isUnusualTime",
-      "operator": "eq",
-      "value": true,
-      "points": 5,
-      "description": "Transaction occurred at an unusual time"
-    },
-    {
-      "id": "RAPID_MOVEMENT",
-      "field": "isRapidMovement",
-      "operator": "eq",
-      "value": true,
-      "points": 15,
-      "description": "Funds were moved rapidly through the account"
-    },
-    {
-      "id": "INCOMPLETE_KYC",
-      "field": "hasIncompleteKyc",
-      "operator": "eq",
-      "value": true,
-      "points": 20,
-      "description": "Customer due-diligence information is incomplete"
-    }
+    { "id": "FATF_BLACK_LIST", "field": "destinationFatfStatus", "operator": "eq", "value": "BLACK_LIST", "points": 30, "exclusiveGroup": "geography", "description": "Destination is on the FATF black list" },
+    { "id": "FATF_NON_COMPLIANT", "field": "destinationFatfStatus", "operator": "eq", "value": "NON_COMPLIANT", "points": 25, "exclusiveGroup": "geography", "description": "Destination is FATF non-compliant" },
+    { "id": "FATF_GREY_LIST", "field": "destinationFatfStatus", "operator": "eq", "value": "GREY_LIST", "points": 15, "exclusiveGroup": "geography", "description": "Destination is on the FATF grey list" },
+    { "id": "KYC_REJECTED", "field": "kycStatus", "operator": "eq", "value": "REJECTED", "points": 30, "exclusiveGroup": "kyc-status", "description": "Customer KYC was rejected" },
+    { "id": "KYC_EXPIRED_AT_TRANSACTION_TIME", "field": "kycExpired", "operator": "eq", "value": true, "points": 25, "exclusiveGroup": "kyc-status", "description": "KYC was expired when the transaction was initiated" },
+    { "id": "KYC_PENDING", "field": "kycStatus", "operator": "eq", "value": "PENDING", "points": 15, "exclusiveGroup": "kyc-status", "description": "Customer KYC is pending" },
+    { "id": "PEP_EXPOSURE", "field": "pepExposure", "operator": "eq", "value": true, "points": 20, "description": "Company or beneficial owner has PEP exposure" },
+    { "id": "HIGH_RISK_INDUSTRY", "field": "highRiskIndustry", "operator": "eq", "value": true, "points": 15, "description": "Industry has high inherent risk or AML sensitivity" },
+    { "id": "ADVERSE_MEDIA", "field": "adverseMedia", "operator": "eq", "value": true, "points": 10, "description": "Adverse-media flag is present" },
+    { "id": "EXTREME_AMOUNT_DEVIATION", "field": "amountRatio", "operator": "gte", "value": 5, "points": 30, "exclusiveGroup": "amount-deviation", "description": "Amount is at least five times the customer's prior norm" },
+    { "id": "HIGH_AMOUNT_DEVIATION", "field": "amountRatio", "operator": "gte", "value": 3, "points": 20, "exclusiveGroup": "amount-deviation", "description": "Amount is at least three times the customer's prior norm" },
+    { "id": "HIGH_DAILY_VALUE", "field": "valueRatio24h", "operator": "gte", "value": 5, "points": 20, "description": "Trailing 24-hour value is at least five times the prior norm" },
+    { "id": "HIGH_24H_VELOCITY", "field": "transactionCount24h", "operator": "gte", "value": 3, "points": 20, "description": "At least three earlier transactions occurred in the last 24 hours" },
+    { "id": "BURST_1H", "field": "transactionCount1h", "operator": "gte", "value": 2, "points": 25, "description": "At least two earlier transactions occurred in the last hour" },
+    { "id": "STRUCTURING_PATTERN", "field": "structuringIndicator", "operator": "eq", "value": true, "points": 25, "description": "Multiple near-threshold transactions collectively exceed the threshold" },
+    { "id": "RAPID_MOVEMENT", "field": "rapidMovementIndicator", "operator": "eq", "value": true, "points": 20, "description": "Funds were moved onward unusually quickly" },
+    { "id": "NEW_HIGH_RISK_COUNTRY", "field": "newHighRiskCountry", "operator": "eq", "value": true, "points": 15, "description": "First payment to a high-risk destination country" },
+    { "id": "NEW_COUNTERPARTY", "field": "isNewCounterparty", "operator": "eq", "value": true, "points": 5, "description": "First payment to this counterparty" },
+    { "id": "UNUSUAL_TIME", "field": "isUnusualTime", "operator": "eq", "value": true, "points": 5, "description": "Transaction occurred outside 06:00-22:00" },
+    { "id": "HIGH_VALUE_ROUND_AMOUNT", "field": "highValueRoundAmount", "operator": "eq", "value": true, "points": 5, "description": "High-value transaction uses a round amount" }
   ]
 }
-

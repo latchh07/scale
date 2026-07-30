@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 
 import { fetchAnomalyResult } from "./anomaly-client.js";
+import { loadTransactionContext } from "./hana-context.js";
 import { calculateAssessment, loadPolicy } from "./risk-engine.js";
 
 const policy = await loadPolicy();
@@ -86,10 +87,47 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  if (
+    request.method === "POST" &&
+    request.url === "/api/risk-assessments/from-transaction"
+  ) {
+    try {
+      const payload = await readJson(request);
+      if (!payload.transactionId) {
+        sendJson(response, 400, { error: "transactionId is required" });
+        return;
+      }
+
+      const context = await loadTransactionContext(payload.transactionId);
+      let anomalyResult = null;
+      try {
+        anomalyResult = await fetchAnomalyResult(context.modelFeatures);
+      } catch (error) {
+        console.error("Anomaly model unavailable:", error.message);
+      }
+
+      const result = calculateAssessment({
+        alertId: payload.alertId ?? null,
+        transactionId: payload.transactionId,
+        ruleInputs: context.ruleInputs,
+        anomalyResult,
+        policy,
+      });
+      sendJson(response, 200, {
+        ...result,
+        featureSnapshot: context.modelFeatures,
+        historyTransactionCount: context.historyCount,
+      });
+    } catch (error) {
+      const status = error.code === "TRANSACTION_NOT_FOUND" ? 404 : 400;
+      sendJson(response, status, { error: error.message });
+    }
+    return;
+  }
+
   sendJson(response, 404, { error: "Route not found" });
 });
 
 server.listen(port, "0.0.0.0", () => {
   console.log(`Risk assessment API listening on port ${port}`);
 });
-

@@ -28,3 +28,5 @@ ai-core/narrow_ai/api_collection/
 .DS_Store
 .vscode/
 
+# Node.js
+node_modules/

@@ -1,0 +1,44 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@sap/hana-client':
+        specifier: 2.29.25
+        version: 2.29.25
+
+packages:
+
+  '@sap/hana-client@2.29.25':
+    resolution: {integrity: sha512-yX8N9hE5S7vDkCTxEoD33JRRbHv0aa3Kqhd5FVlaqv+xNKMtZDgtZmXPe29KLo3Y5GjZhpoqixr/1mt0C2Ahjw==}
+    engines: {node: '>=4.0.0'}
+
+  debug@3.1.0:
+    resolution: {integrity: sha512-OX8XqP7/1a9cqkxYw2yXss15f26NKWBpDXQd0/uK/KPqdQhxbPa994hnzjcE2VqQpDslf55723cKPUOGSmMY3g==}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
+  ms@2.0.0:
+    resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
+
+snapshots:
+
+  '@sap/hana-client@2.29.25':
+    dependencies:
+      debug: 3.1.0
+    transitivePeerDependencies:
+      - supports-color
+
+  debug@3.1.0:
+    dependencies:
+      ms: 2.0.0
+
+  ms@2.0.0: {}
