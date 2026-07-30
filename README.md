@@ -6,7 +6,9 @@ Shared implementation repository for the SCALE 2026 hackathon.
 
 The predictive AI component is under [`ai-core/narrow_ai`](ai-core/narrow_ai).
 It trains an explainable Isolation Forest model and serves a 0-100 transaction
-anomaly score through SAP AI Core.
+anomaly score through SAP AI Core. The model uses transaction-behaviour
+features only; known KYC, sanctions, PEP and adverse-media facts remain in the
+deterministic rule engine.
 
 SAP AI Launchpad application settings:
 

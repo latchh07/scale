@@ -26,7 +26,6 @@ class PredictionRequest(BaseModel):
     hours_since_previous: float = Field(ge=0)
     is_new_counterparty: int = Field(ge=0, le=1)
     is_new_country: int = Field(ge=0, le=1)
-    is_high_risk_country: int = Field(ge=0, le=1)
     is_unusual_time: int = Field(ge=0, le=1)
 
 
@@ -72,4 +71,3 @@ def predict(request: PredictionRequest) -> dict:
     row = select_and_validate_features(pd.DataFrame([payload], columns=FEATURES))
     result = score_row(bundle, row)
     return {"transactionId": transaction_id, **result}
-

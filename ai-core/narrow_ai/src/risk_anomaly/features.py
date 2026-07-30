@@ -15,14 +15,12 @@ FEATURES = [
     "hours_since_previous",
     "is_new_counterparty",
     "is_new_country",
-    "is_high_risk_country",
     "is_unusual_time",
 ]
 
 BINARY_FEATURES = {
     "is_new_counterparty",
     "is_new_country",
-    "is_high_risk_country",
     "is_unusual_time",
 }
 
@@ -35,7 +33,6 @@ FEATURE_LABELS = {
     "hours_since_previous": "time since the previous transaction",
     "is_new_counterparty": "new counterparty",
     "is_new_country": "new destination country",
-    "is_high_risk_country": "high-risk destination country",
     "is_unusual_time": "unusual transaction time",
 }
 
@@ -71,4 +68,3 @@ def select_and_validate_features(frame: pd.DataFrame) -> pd.DataFrame:
         )
 
     return result.astype(float)
-

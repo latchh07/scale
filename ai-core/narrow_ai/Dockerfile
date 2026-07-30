@@ -19,7 +19,7 @@ ENV PYTHONPATH=/app/src \
     DATA_DIR=/app/data/ \
     DATA_FILE=risk_features.csv \
     MODEL_OUT_DIR=/app/model/ \
-    MODEL_VERSION=v1 \
+    MODEL_VERSION=v2-behaviour-only \
     CONTAMINATION=0.03
 
 EXPOSE 9001

@@ -22,7 +22,6 @@
     "hours_since_previous": 0.05,
     "is_new_counterparty": 1,
     "is_new_country": 1,
-    "is_high_risk_country": 1,
     "is_unusual_time": 1
   },
   "anomalyResult": {
@@ -37,4 +36,3 @@
     ]
   }
 }
-

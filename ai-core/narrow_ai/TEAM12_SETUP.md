@@ -9,7 +9,7 @@ the spam classifier with the Team 12 transaction anomaly model.
 2. Build and push the image as:
    `mgcxzzz/team12-risk-anomaly:latest`.
    Verified Docker Hub digest:
-   `sha256:8d53cfe499851c3e09a320cea3f331fe61c7a3ac5c80457de75d9692bdc1ad14`.
+   `sha256:97944663649f9a1d38a6f0e87390b8cc05d9f0b3d3f29c9385cec3feae7d91be`.
 3. Do not copy object-store credentials, SAP service keys, `.env` files or
    generated models into this repository.
 4. Keep the Bruno collection local. It is ignored because it can contain
@@ -31,10 +31,11 @@ It must contain at least 50 rows and these columns:
 - `hours_since_previous`
 - `is_new_counterparty`
 - `is_new_country`
-- `is_high_risk_country`
 - `is_unusual_time`
 
-The last four columns must contain only `0` or `1`.
+The last three columns must contain only `0` or `1`. Known compliance facts
+such as KYC risk, sanctions, PEP and adverse media are intentionally handled
+by the deterministic rule engine rather than this behavioural anomaly model.
 
 ## SAP AI Launchpad values
 
@@ -70,7 +71,6 @@ Example:
     "hours_since_previous": 0.05,
     "is_new_counterparty": 1,
     "is_new_country": 1,
-    "is_high_risk_country": 0,
     "is_unusual_time": 1
   }
 }
