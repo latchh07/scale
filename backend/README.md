@@ -63,6 +63,18 @@ country/industry context, calls AI Core, and returns one assessment JSON.
 It never sends HANA identifiers, names, KYC, or sanctions data to the anomaly
 model.
 
+With the backend running, test any HANA transaction in one command:
+
+```powershell
+pnpm test:transaction -- 1
+```
+
+Optionally, give the result a specific alert ID:
+
+```powershell
+pnpm test:transaction -- 1 DEMO-001
+```
+
 The example supplies `anomalyResult` directly, which allows local development
 before AI Core is deployed.
 
