@@ -1,0 +1,118 @@
+{
+  "policyVersion": "1.0.0",
+  "weights": {
+    "rules": 0.75,
+    "anomaly": 0.25
+  },
+  "scoreCap": 100,
+  "anomalyFlagThreshold": 85,
+  "riskBands": [
+    {
+      "minimum": 85,
+      "level": "CRITICAL",
+      "recommendedAction": "ESCALATE_FOR_REVIEW"
+    },
+    {
+      "minimum": 70,
+      "level": "HIGH",
+      "recommendedAction": "PRIORITY_REVIEW"
+    },
+    {
+      "minimum": 40,
+      "level": "MEDIUM",
+      "recommendedAction": "STANDARD_REVIEW"
+    },
+    {
+      "minimum": 0,
+      "level": "LOW",
+      "recommendedAction": "MONITOR"
+    }
+  ],
+  "hardOverrides": [
+    {
+      "id": "SANCTIONS_MATCH",
+      "field": "sanctionsMatch",
+      "operator": "eq",
+      "value": true,
+      "minimumScore": 100,
+      "description": "Confirmed sanctions match"
+    },
+    {
+      "id": "WATCHLIST_MATCH",
+      "field": "watchlistMatch",
+      "operator": "eq",
+      "value": true,
+      "minimumScore": 90,
+      "description": "Confirmed watchlist match"
+    }
+  ],
+  "rules": [
+    {
+      "id": "HIGH_RISK_COUNTRY",
+      "field": "isHighRiskCountry",
+      "operator": "eq",
+      "value": true,
+      "points": 20,
+      "description": "Transaction involves a high-risk country"
+    },
+    {
+      "id": "NEW_COUNTERPARTY",
+      "field": "isNewCounterparty",
+      "operator": "eq",
+      "value": true,
+      "points": 15,
+      "description": "Payment was made to a new counterparty"
+    },
+    {
+      "id": "EXTREME_AMOUNT_DEVIATION",
+      "field": "amountRatio",
+      "operator": "gte",
+      "value": 5,
+      "points": 30,
+      "exclusiveGroup": "amount-deviation",
+      "description": "Amount is at least five times the customer's normal amount"
+    },
+    {
+      "id": "HIGH_AMOUNT_DEVIATION",
+      "field": "amountRatio",
+      "operator": "gte",
+      "value": 3,
+      "points": 20,
+      "exclusiveGroup": "amount-deviation",
+      "description": "Amount is at least three times the customer's normal amount"
+    },
+    {
+      "id": "HIGH_TRANSACTION_VELOCITY",
+      "field": "transactionCount1h",
+      "operator": "gte",
+      "value": 10,
+      "points": 15,
+      "description": "High transaction frequency during the last hour"
+    },
+    {
+      "id": "UNUSUAL_TIME",
+      "field": "isUnusualTime",
+      "operator": "eq",
+      "value": true,
+      "points": 5,
+      "description": "Transaction occurred at an unusual time"
+    },
+    {
+      "id": "RAPID_MOVEMENT",
+      "field": "isRapidMovement",
+      "operator": "eq",
+      "value": true,
+      "points": 15,
+      "description": "Funds were moved rapidly through the account"
+    },
+    {
+      "id": "INCOMPLETE_KYC",
+      "field": "hasIncompleteKyc",
+      "operator": "eq",
+      "value": true,
+      "points": 20,
+      "description": "Customer due-diligence information is incomplete"
+    }
+  ]
+}
+

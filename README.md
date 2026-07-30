@@ -19,3 +19,10 @@ SAP AI Launchpad application settings:
 - Docker image: `mgcxzzz/team12-risk-anomaly:latest`
 
 Credentials, datasets, trained models and access tokens must never be committed.
+
+## Risk assessment backend
+
+The configurable rules and unified JSON API are under [`backend`](backend).
+The policy is stored in `backend/config/risk-policy.json`, allowing the team to
+change rule points, thresholds, risk bands and the rule/ML weighting without
+rewriting application code.

@@ -1,0 +1,40 @@
+{
+  "alertId": "ALT-001",
+  "transactionId": "TX-001",
+  "ruleInputs": {
+    "sanctionsMatch": false,
+    "watchlistMatch": false,
+    "isHighRiskCountry": true,
+    "isNewCounterparty": true,
+    "amountRatio": 6.2,
+    "transactionCount1h": 14,
+    "isUnusualTime": true,
+    "isRapidMovement": false,
+    "hasIncompleteKyc": false
+  },
+  "modelFeatures": {
+    "transaction_id": "TX-001",
+    "amount_ratio": 6.2,
+    "amount_zscore": 5.4,
+    "transaction_count_1h": 14,
+    "transaction_count_24h": 32,
+    "value_ratio_24h": 7.1,
+    "hours_since_previous": 0.05,
+    "is_new_counterparty": 1,
+    "is_new_country": 1,
+    "is_high_risk_country": 1,
+    "is_unusual_time": 1
+  },
+  "anomalyResult": {
+    "anomalyScore": 96,
+    "anomalyBand": "HIGH",
+    "anomalyFlag": true,
+    "modelVersion": "demo-v1",
+    "topDeviations": [
+      "Amount is significantly above normal",
+      "Unusual transaction frequency",
+      "New destination country"
+    ]
+  }
+}
+
