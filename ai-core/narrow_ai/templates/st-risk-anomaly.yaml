@@ -3,7 +3,7 @@ kind: ServingTemplate
 metadata:
   annotations:
     scenarios.ai.sap.com/name: "Team 12 Risk Anomaly"
-    executables.ai.sap.com/name: "Team 12 Serve Risk Anomaly"
+    executables.ai.sap.com/name: "team12-serve-risk-anomaly"
     executables.ai.sap.com/description: "Serve explainable transaction anomaly scores"
   labels:
     scenarios.ai.sap.com/id: "scenario-risk-anomaly-team12"
