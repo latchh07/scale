@@ -1,0 +1,13 @@
+node_modules
+dist
+.env
+.env.local
+
+# scratch artefacts
+.probe
+snap.tmp.jsx
+vite.config.js.timestamp-*
+
+# regenerate with: npx esbuild src/main.jsx --bundle --format=iife --loader:.jsx=jsx --minify \
+#   --outfile=/tmp/app.js --define:import.meta.env='{"VITE_FORCE_DEMO":"true"}'
+# (kept in the repo on purpose - it is the offline demo build)

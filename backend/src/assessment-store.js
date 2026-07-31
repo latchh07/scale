@@ -90,7 +90,7 @@ export async function ensureAssessmentStore() {
       connection,
       `CREATE COLUMN TABLE "${schema}"."RISK_ASSESSMENTS" (
         "ASSESSMENT_ID" NVARCHAR(64) NOT NULL,
-        "TRANSACTION_ID" NVARCHAR(100) NOT NULL,
+        "TRANSACTION_ID" INTEGER NOT NULL,
         "ALERT_ID" NVARCHAR(100),
         "SOURCE_CASE_ID" NVARCHAR(100),
         "CASE_ID" BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
@@ -99,6 +99,12 @@ export async function ensureAssessmentStore() {
         "RECOMMENDED_ACTION" NVARCHAR(50) NOT NULL,
         "RULE_SCORE" INTEGER NOT NULL,
         "ANOMALY_SCORE" INTEGER,
+        "AMOUNT_RISK_SCORE" INTEGER NOT NULL,
+        "FREQUENCY_RISK_SCORE" INTEGER NOT NULL,
+        "GEOGRAPHY_RISK_SCORE" INTEGER NOT NULL,
+        "COUNTERPARTY_RISK_SCORE" INTEGER NOT NULL,
+        "PATTERN_RISK_SCORE" INTEGER NOT NULL,
+        "VELOCITY_RISK_SCORE" INTEGER NOT NULL,
         "RULES_TRIGGERED_JSON" NCLOB,
         "MODEL_SIGNALS_JSON" NCLOB,
         "FEATURE_SNAPSHOT_JSON" NCLOB,
@@ -126,17 +132,39 @@ export async function persistAssessment({ assessment, featureSnapshot = null, so
   const assessmentId = crypto.randomUUID();
   const connection = await connect();
   try {
+    // Map sub-scores
+    let amountScore = 0;
+    let frequencyScore = 0;
+    let geographyScore = 0;
+    let counterpartyScore = 0;
+    let patternScore = 0;
+    let velocityScore = 0;
+    
+    const triggered = assessment.rulesTriggered || [];
+    triggered.forEach(rule => {
+        const id = rule.ruleId || "";
+        const pts = rule.points || 0;
+        if (id.includes("AMOUNT")) amountScore += pts;
+        else if (id.includes("FATF") || id.includes("COUNTRY") || id.includes("DESTINATION")) geographyScore += pts;
+        else if (id.includes("DAILY") || id.includes("RAPID") || id.includes("VELOCITY")) velocityScore += pts;
+        else if (id.includes("STRUCTURING") || id.includes("PATTERN")) patternScore += pts;
+        else if (id.includes("KYC") || id.includes("PEP") || id.includes("COUNTERPARTY") || id.includes("MEDIA")) counterpartyScore += pts;
+        else frequencyScore += pts;
+    });
+
     await execute(
       connection,
       `INSERT INTO "${schema}"."RISK_ASSESSMENTS" (
         "ASSESSMENT_ID", "TRANSACTION_ID", "ALERT_ID", "SOURCE_CASE_ID",
         "OVERALL_SCORE", "RISK_LEVEL", "RECOMMENDED_ACTION", "RULE_SCORE", "ANOMALY_SCORE",
+        "AMOUNT_RISK_SCORE", "FREQUENCY_RISK_SCORE", "GEOGRAPHY_RISK_SCORE", 
+        "COUNTERPARTY_RISK_SCORE", "PATTERN_RISK_SCORE", "VELOCITY_RISK_SCORE",
         "RULES_TRIGGERED_JSON", "MODEL_SIGNALS_JSON", "FEATURE_SNAPSHOT_JSON", "ASSESSMENT_JSON",
         "POLICY_VERSION", "GENERATED_AT"
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         assessmentId,
-        String(assessment.transactionId),
+        parseInt(assessment.transactionId, 10),
         assessment.alertId == null ? null : String(assessment.alertId),
         sourceCaseId == null ? null : String(sourceCaseId),
         Number(assessment.assessment.overallScore),
@@ -146,6 +174,12 @@ export async function persistAssessment({ assessment, featureSnapshot = null, so
         assessment.scoreBreakdown.anomalyScore == null
           ? null
           : Number(assessment.scoreBreakdown.anomalyScore),
+        amountScore,
+        frequencyScore,
+        geographyScore,
+        counterpartyScore,
+        patternScore,
+        velocityScore,
         JSON.stringify(assessment.rulesTriggered ?? []),
         JSON.stringify(assessment.modelSignals ?? {}),
         featureSnapshot == null ? null : JSON.stringify(featureSnapshot),

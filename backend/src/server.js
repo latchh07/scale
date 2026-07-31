@@ -7,6 +7,7 @@ import {
   persistAssessment,
 } from "./assessment-store.js";
 import { loadTransactionContext } from "./hana-context.js";
+import { loadTransactionDetail } from "./transaction-detail.js";
 import { calculateAssessment, loadPolicy } from "./risk-engine.js";
 
 const policy = await loadPolicy();
@@ -104,23 +105,36 @@ const server = createServer(async (request, response) => {
         }
       }
 
-      const result = calculateAssessment({
+      const assessed = calculateAssessment({
         alertId: payload.alertId,
         transactionId: payload.transactionId,
         ruleInputs: payload.ruleInputs ?? {},
         anomalyResult,
         policy,
       });
+      // Optional descriptive block (amount, corridor, counterparty). Persisted
+      // with the assessment so consumers can render case context without a
+      // second lookup. Absent is fine — consumers degrade gracefully.
+      const result = payload.transaction
+        ? { ...assessed, transaction: payload.transaction }
+        : assessed;
       try {
         const savedAssessment = await persistAssessment({
           assessment: result,
           featureSnapshot: payload.modelFeatures ?? null,
           sourceCaseId: payload.sourceCaseId ?? null,
         });
+        
         sendJson(response, 200, { ...result, ...savedAssessment, persistence: "SAVED" });
-      } catch (error) {
-        console.error("Assessment persistence unavailable:", error.message);
-        sendJson(response, 200, { ...result, persistence: "UNAVAILABLE" });
+      } catch (dbError) {
+        console.error("Failed to persist score to database:", dbError.message);
+        result.persistenceStatus = "FAILED";
+        sendJson(response, 503, { 
+            error: "Failed to persist score to database", 
+            details: dbError.message,
+            persistenceStatus: "FAILED"
+        });
+        return;
       }
     } catch (error) {
       sendJson(response, 400, { error: error.message });
@@ -158,6 +172,17 @@ const server = createServer(async (request, response) => {
         ...result,
         featureSnapshot: context.modelFeatures,
         historyTransactionCount: context.historyCount,
+        // Descriptive detail (names, corridor, product). Falls back to the IDs
+        // already in the scoring context if the lookup is unavailable.
+        transaction: (await loadTransactionDetail(payload.transactionId)) ?? {
+          amountUsd: context.transaction.amountUsd,
+          currency: "USD",
+          originatorName: context.transaction.originatorCompanyId,
+          originatorCountry: null,
+          destinationCountry: context.transaction.destinationCountryId,
+          productType: null,
+          initiatedAt: context.transaction.initiatedAt,
+        },
       };
       try {
         const savedAssessment = await persistAssessment({
@@ -166,9 +191,15 @@ const server = createServer(async (request, response) => {
           sourceCaseId: payload.sourceCaseId ?? null,
         });
         sendJson(response, 200, { ...responsePayload, ...savedAssessment, persistence: "SAVED" });
-      } catch (error) {
-        console.error("Assessment persistence unavailable:", error.message);
-        sendJson(response, 200, { ...responsePayload, persistence: "UNAVAILABLE" });
+      } catch (dbError) {
+        console.error("Assessment persistence unavailable:", dbError.message);
+        responsePayload.persistenceStatus = "FAILED";
+        sendJson(response, 503, { 
+            error: "Failed to persist score to database", 
+            details: dbError.message,
+            persistenceStatus: "FAILED"
+        });
+        return;
       }
     } catch (error) {
       const status = error.code === "TRANSACTION_NOT_FOUND" ? 404 : 400;

@@ -5,15 +5,20 @@
   "description": "Configurable risk assessment API for SCALE 2026",
   "type": "module",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node --env-file-if-exists=.env --env-file-if-exists=../team_12.env src/server.js",
     "test": "node --test test/risk-engine.test.js",
-    "test:transaction": "node scripts/test-transaction.js",
-    "setup:assessment-store": "node --env-file=.env scripts/setup-assessment-store.js"
+    "test:transaction": "node --env-file-if-exists=.env --env-file-if-exists=../team_12.env scripts/test-transaction.js",
+    "setup:assessment-store": "node --env-file-if-exists=.env --env-file-if-exists=../team_12.env scripts/setup-assessment-store.js",
+    "simulate": "node --env-file-if-exists=.env --env-file-if-exists=../team_12.env scripts/simulate-transactions.js",
+    "preflight": "node --env-file-if-exists=.env --env-file-if-exists=../team_12.env scripts/hana-preflight.js",
+    "seed:hana": "node --env-file-if-exists=.env --env-file-if-exists=../team_12.env scripts/seed-from-hana.js",
+    "describe:corridor": "node --env-file-if-exists=.env --env-file-if-exists=../team_12.env scripts/describe-corridor.js"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "@sap/hana-client": "2.29.25"
+    "@sap/hana-client": "2.29.25",
+    "dotenv": "^17.4.2"
   }
 }

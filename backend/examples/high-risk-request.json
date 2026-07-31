@@ -1,6 +1,6 @@
 {
-  "alertId": "ALT-001",
-  "transactionId": "TX-001",
+  "alertId": 15004,
+  "transactionId": 5001,
   "ruleInputs": {
     "sanctionsMatch": false,
     "watchlistMatch": false,

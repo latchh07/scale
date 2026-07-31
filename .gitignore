@@ -1,6 +1,9 @@
 # Credentials and local environment files
 .env
 .env.*
+*.env
+team_12.env
+team_12_credentials.json
 *.pem
 *.key
 *credential*
